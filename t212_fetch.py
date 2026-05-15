@@ -193,7 +193,7 @@ def _page_earliest(headers: dict, start_url: str, extract_date) -> datetime | No
 
         next_page = data.get("nextPagePath")  # relative path for cursor-based pagination
         if next_page:
-            next_url = f"{BASE_HOST}{next_page}"  # reconstruct full URL from relative path
+            next_url = f"{BASE_HOST}/{next_page}"  # reconstruct full URL from relative path
             remaining = safe_parse_remaining(resp.headers.get("x-ratelimit-remaining"))
             if remaining <= 1:  # about to exhaust the rate-limit bucket
                 parsed = safe_parse_reset(resp.headers.get("x-ratelimit-reset"))
