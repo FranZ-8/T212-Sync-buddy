@@ -193,8 +193,12 @@ def _page_earliest(headers: dict, start_url: str, extract_date) -> datetime | No
 
         next_page = data.get("nextPagePath")  # relative path for cursor-based pagination
         if next_page:
-            next_url = f"{BASE_HOST}/{next_page}"  # reconstruct full URL from relative path
-            remaining = safe_parse_remaining(resp.headers.get("x-ratelimit-remaining"))
+            if "api/v0" not in next_page and not next_page.startswith("/"):
+                next_url = f"{BASE_HOST}/api/v0/equity/history/transactions?{next_page}"
+            else:
+                next_url = f"{BASE_HOST}{next_page}" if next_page.startswith("/") else f"{BASE_HOST}/{next_page}"  # reconstruct full URL from relative path
+                
+               remaining = safe_parse_remaining(resp.headers.get("x-ratelimit-remaining"))
             if remaining <= 1:  # about to exhaust the rate-limit bucket
                 parsed = safe_parse_reset(resp.headers.get("x-ratelimit-reset"))
                 wait = max(10, parsed - int(time.time()) + 1) if parsed is not None else 10
