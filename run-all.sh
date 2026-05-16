@@ -116,6 +116,10 @@ for prefix in "${!accounts[@]}"; do
     #  --add-host=host.docker.internal:host-gateway \
     #  dickwolff/export-to-ghostfolio
     
+    # Deixa uma cópia direta na raiz do input para o exportador ver
+    cp "$csv_file" "input/${csv_name}"
+
+    # Move o original para a pasta done para o script de Python ficar feliz
     mkdir -p "input/done"
     mv "$csv_file" "input/done/"
     exit 0
