@@ -100,21 +100,21 @@ for prefix in "${!accounts[@]}"; do
     # Use HOST_SCRIPTS_DIR when running inside Docker (container paths ≠ host paths for socket mounts)
     _mount_base="${HOST_SCRIPTS_DIR:-$(pwd)}"
 
-    docker run --rm \
-      --user "$(id -u):$(id -g)" \
-      -v "${_mount_base}/temp:/var/tmp/e2g-input" \
-      -v "${_mount_base}/out:/var/tmp/e2g-output" \
-      -v "${_mount_base}/cache:/var/tmp/e2g-cache" \
-      --env INPUT_FILE="$csv_name" \
-      --env GHOSTFOLIO_ACCOUNT_ID="$account_id" \
-      --env GHOSTFOLIO_VALIDATE="${GHOSTFOLIO_VALIDATE:-true}" \
-      --env GHOSTFOLIO_IMPORT="${GHOSTFOLIO_IMPORT:-true}" \
-      --env GHOSTFOLIO_UPDATE_CASH="${GHOSTFOLIO_UPDATE_CASH:-TRUE}" \
-      --env GHOSTFOLIO_URL="$GHOSTFOLIO_URL" \
-      --env GHOSTFOLIO_SECRET="$GHOSTFOLIO_SECRET" \
-      --env NODE_OPTIONS="${NODE_OPTIONS:---max-old-space-size=4000}" \
-      --add-host=host.docker.internal:host-gateway \
-      dickwolff/export-to-ghostfolio
+    #  docker run --rm \
+    #  --user "$(id -u):$(id -g)" \
+    #  -v "${_mount_base}/temp:/var/tmp/e2g-input" \
+    #  -v "${_mount_base}/out:/var/tmp/e2g-output" \
+    #  -v "${_mount_base}/cache:/var/tmp/e2g-cache" \
+    #  --env INPUT_FILE="$csv_name" \
+    #  --env GHOSTFOLIO_ACCOUNT_ID="$account_id" \
+    #  --env GHOSTFOLIO_VALIDATE="${GHOSTFOLIO_VALIDATE:-true}" \
+    #  --env GHOSTFOLIO_IMPORT="${GHOSTFOLIO_IMPORT:-true}" \
+    #  --env GHOSTFOLIO_UPDATE_CASH="${GHOSTFOLIO_UPDATE_CASH:-TRUE}" \
+    #  --env GHOSTFOLIO_URL="$GHOSTFOLIO_URL" \
+    #  --env GHOSTFOLIO_SECRET="$GHOSTFOLIO_SECRET" \
+    #  --env NODE_OPTIONS="${NODE_OPTIONS:---max-old-space-size=4000}" \
+    #  --add-host=host.docker.internal:host-gateway \
+    #  dickwolff/export-to-ghostfolio
     
     # Collect all produced JSON files
     mapfile -t produced_json < <(find out -maxdepth 1 -type f -name 'ghostfolio-*.json' 2>/dev/null | sort)
