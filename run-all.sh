@@ -1,4 +1,4 @@
-#!/bin/bash
+  #!/bin/bash
 set -e -o pipefail
 
 # Load environment variables from .env file and export them
@@ -116,12 +116,14 @@ for prefix in "${!accounts[@]}"; do
     #  --add-host=host.docker.internal:host-gateway \
     #  dickwolff/export-to-ghostfolio
     
-    # Deixa uma cópia direta na raiz do input para o exportador ver
-    cp "$csv_file" "input/${csv_name}"
-
-    # Move o original para a pasta done para o script de Python ficar feliz
+    # 1. Garante que a pasta done existe para o Python não reclamar
     mkdir -p "input/done"
-    mv "$csv_file" "input/done/"
+
+    # 2. Em vez de mover o ficheiro original e escondê-lo do exportador,
+    # fazemos uma cópia de segurança para a pasta done. O original FICA na raiz do input!
+    cp "$csv_file" "input/done/"
+
+    # 3. Saimos com sucesso total
     exit 0
     
     # Collect all produced JSON files
