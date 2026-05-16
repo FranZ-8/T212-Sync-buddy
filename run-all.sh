@@ -116,6 +116,8 @@ for prefix in "${!accounts[@]}"; do
     #  --add-host=host.docker.internal:host-gateway \
     #  dickwolff/export-to-ghostfolio
     
+    mkdir -p "input/done"
+    mv "$csv_file" "input/done/"
     exit 0
     
     # Collect all produced JSON files
