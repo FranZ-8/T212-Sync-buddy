@@ -117,15 +117,37 @@ for prefix in "${!accounts[@]}"; do
     #  dickwolff/export-to-ghostfolio
     
 
-    echo "🚀 A descodificar e a executar o script de envio..."
+    echo "📝 Criando o script de upload com printf..."
 
-    # Isto reconstrói o script Python perfeito de forma limpa, sem problemas de aspas
-    echo "aW1wb3J0IG9zLCBzeXMsIHJlcXVlc3RzCgpkZWYgdXBsb2FkKCk6CiAgICBjc3ZfZmlsZSA9IHN5cy5hcmd2WzFdCiAgICBhY2NvdW50X2lkID0gc3lzLmFyZ3ZbMl0KICAgIHVybCA9IG9zLmVudmlyb24uZ2V0KCJHSE9TVEZPTElPX1VSTCIpCiAgICBzZWNyZXQgPSBvcy5lbnZpcm9uLmdldCgiR0hPU1RGT0xJT19TRUNSRVQiKQogICAgaWYgbm90IHVybCBvciBub3Qgc2VjcmV0OgogICAgICAgIHByaW50KCJYIEVycm86IFZhcmlhdmVpcyBHSU9TVEZPTElPIG5hbyBjb25maWd1cmFkYXMuIik7IHN5cy5leGl0KDEpCiAgICBlbmRwb2ludCA9IGYie3VybC5yc3RyaXAoJy8nKX0vYXBpL3YxL2ltcG9ydCIKICAgIGhlYWRlcnMgPSB7IkF1dGhvcml6YXRpb24iOiBmIkJlYXJlciB7c2VjcmV0fSJ9CiAgICBwcmludChmI蓬IEVudmlhbmRvIHtjc3ZfZmlsZX0gcGFyYSBhIEFQSS4uLiIpCiAgICB3aXRoIG9wZW4oY3N2X2ZpbGUsICdyYicpIGFzIGY6CiAgICAgICAgZmlsZXMgPSB7J2ZpbGUnOiAoJ2ltcG9ydC5jc3YnLCBmLCAndGV4dC9jc3YnKX0KICAgICAgICBkYXRhID0geydhY2NvdW50SWQnOiBhY2NvdW50X2lkfQogICAgICAgIHJlc3BvbnNlID0gcmVxdWVzdHMucG9zdChlbmRwb2ludCwgaGVhZGVycz1oZWFkZXJzLCBmaWxlcz1maWxlcywgZGF0YT1kYXRhKQogICAgaWYgcmVzcG9uc2Uuc3RhdHVzX2NvZGUgaW4gWzIwMCwgMjAxXToKICAgICAgICBwcmludCgi 大IE52aW8gZWZldHVhZG8gY29tIHN1Y2Vzc28gdG90YWwhIikKICAgIGVsc2U6CiAgICAgICAgcHJpbnQoZiJYIEZhbGhhOiB7cmVzcG9uc2Uuc3RhdHVzX2NvZGV9Iik7IHByaW50KHJlc3BvbnNlLnRleHQpOyBzeXMuZXGldCgxKQoKaWYgX19uYW1lX18gPT0gJ19fbWFpbl9fJzogdXBsb2FkKCk=" | base64 -d > upload_to_gf.py
+    # Limpa qualquer tentativa anterior
+    rm -f upload_to_gf.py
 
-    # Executa o script gerado com toda a segurança
+    # Monta o script Python usando códigos hex para aspas, evitando erros de sintaxe
+    printf "import os, sys, requests\n" >> upload_to_gf.py
+    printf "def upload():\n" >> upload_to_gf.py
+    printf "    csv_file = sys.argv[1]\n" >> upload_to_gf.py
+    printf "    account_id = sys.argv[2]\n" >> upload_to_gf.py
+    printf "    url = os.environ.get(\x22GHOSTFOLIO_URL\x22)\n" >> upload_to_gf.py
+    printf "    secret = os.environ.get(\x22GHOSTFOLIO_SECRET\x22)\n" >> upload_to_gf.py
+    printf "    if not url or not secret:\n" >> upload_to_gf.py
+    printf "        print(\x22Erro: Variaveis Ghostfolio nao encontradas.\x22); sys.exit(1)\n" >> upload_to_gf.py
+    printf "    endpoint = f\x22{url.rstrip(\x27/\x27)}/api/v1/import\x22\n" >> upload_to_gf.py
+    printf "    headers = {\x22Authorization\x22: f\x22Bearer {secret}\x22}\n" >> upload_to_gf.py
+    printf "    print(f\x22Enviando {csv_file} para a API...\x22)\n" >> upload_to_gf.py
+    printf "    with open(csv_file, \x27rb\x27) as f:\n" >> upload_to_gf.py
+    printf "        files = {\x27file\x27: (\x27import.csv\x27, f, \x27text/csv\x27)}\n" >> upload_to_gf.py
+    printf "        data = {\x27accountId\x27: account_id}\n" >> upload_to_gf.py
+    printf "        response = requests.post(endpoint, headers=headers, files=files, data=data)\n" >> upload_to_gf.py
+    printf "    if response.status_code in [200, 201]:\n" >> upload_to_gf.py
+    printf "        print(\x22Envio concluido com sucesso!\x22)\n" >> upload_to_gf.py
+    printf "    else:\n" >> upload_to_gf.py
+    printf "        print(f\x22Falha: {response.status_code}\x22); print(response.text); sys.exit(1)\n" >> upload_to_gf.py
+    printf "if __name__ == \x22__main__\x22: upload()\n" >> upload_to_gf.py
+
+    echo "🚀 Executando o script de envio..."
     python upload_to_gf.py "$csv_file" "$account_id"
 
-    # Garante a pasta e o ficheiro done para dar o sinal verde (Completed) ao Python
+    # Garante o estado verde no script principal do Python
     mkdir -p "input/done"
     cp "$csv_file" "input/done/"
     exit 0
