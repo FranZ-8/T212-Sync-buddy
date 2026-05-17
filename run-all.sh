@@ -142,6 +142,7 @@ os.remove('e2g.zip')
     cd e2g-core
     
     INPUT_FILE="$csv_name" \
+    E2G_CONVERTER="t212" \
     GHOSTFOLIO_ACCOUNT_ID="$account_id" \
     GHOSTFOLIO_VALIDATE="${GHOSTFOLIO_VALIDATE:-true}" \
     GHOSTFOLIO_IMPORT="${GHOSTFOLIO_IMPORT:-true}" \
