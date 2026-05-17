@@ -139,7 +139,7 @@ os.remove('e2g.zip')
 
     echo "🚀 Executando o motor original do criador..."
 
-    # Entramos na pasta do criador para o Node ler o package.json original dele
+    # Entramos na pasta do criador para rodar o motor
     cd e2g-core
     
     # Exportamos os caminhos e credenciais para o sistema operativo do container
@@ -155,8 +155,8 @@ os.remove('e2g.zip')
     export E2G_OUTPUT_DIR="$(pwd)/../out"
     export E2G_CACHE_DIR="$(pwd)/../cache"
     
-    # Executamos o comando oficial passando o argumento que valida a Trading 212
-    npm start -- --converter=t212 || {
+    # 🔥 Chamamos o script diretamente via npx tsx passando os argumentos com espaço
+    npx tsx ./src/manual.ts --converter t212 || {
       echo "❌ O motor original falhou para $csv_name"
       cd ..
       rm -f "temp/$csv_name"
@@ -167,7 +167,6 @@ os.remove('e2g.zip')
     # Voltamos para a raiz do teu projeto para o script continuar normalmente
     cd ..
     echo "✅ Conversor oficial executado com sucesso!"
-    # =====================================================================
 
     # Collect all produced JSON files
     mapfile -t produced_json < <(find out -maxdepth 1 -type f -name 'ghostfolio-*.json' 2>/dev/null | sort)
