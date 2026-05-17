@@ -116,22 +116,31 @@ for prefix in "${!accounts[@]}"; do
     #  --add-host=host.docker.internal:host-gateway \
     #  dickwolff/export-to-ghostfolio
     
-    # =====================================================================
-    # 🔥 ADAPTAÇÃO PARA A NUVEM FINAL (SEM DOCKER - USANDO O MOTOR ORIGINAL)
+# =====================================================================
+    # 🔥 ADAPTAÇÃO PARA A NUVEM FINAL (DESCARGA EM ZIP - SEM GIT)
     # =====================================================================
     echo "⚙️ Configurando o motor de conversão oficial do criador..."
     
-    # 1. Se o conversor do criador não estiver na máquina, clona-o diretamente do GitHub oficial
+    # 1. Se a pasta do motor não existir, descarrega o ZIP oficial do GitHub do criador
     if [ ! -d "e2g-core" ]; then
-        echo "📥 Descarregando o conversor oficial do GitHub..."
-        git clone https://github.com/dickwolff/Export-To-Ghostfolio.git e2g-core
+        echo "📥 Descarregando o conversor oficial (via ZIP)..."
+        # Descarrega o código fonte principal do criador sem precisar do comando 'git'
+        python3 -c "
+    import urllib.request, zipfile, os
+    url = 'https://github.com/dickwolff/Export-To-Ghostfolio/archive/refs/heads/main.zip'
+    urllib.request.urlretrieve(url, 'e2g.zip')
+    with zipfile.ZipFile('e2g.zip', 'r') as zip_ref:
+    zip_ref.extractall('.')
+    os.rename('Export-To-Ghostfolio-main', 'e2g-core')
+    os.remove('e2g.zip')
+    "
+        echo "📦 Instalando dependências do motor..."
         cd e2g-core && npm install && cd ..
     fi
 
-    echo "🚀 Iniciando a conversão oficial (Formato Original)..."
+    echo "🚀 Iniciando a conversão oficial (Formato Nativo)..."
 
-    # 2. Executa o conversor nativo com as pastas mapeadas exatamente como o Docker faria
-    # Executa o conversor usando o comando binário direto do pacote instalado
+    # 2. Executa o conversor nativo apontando para a pasta onde extraímos o código
     INPUT_FILE="$csv_name" \
     GHOSTFOLIO_ACCOUNT_ID="$account_id" \
     GHOSTFOLIO_VALIDATE="${GHOSTFOLIO_VALIDATE:-true}" \
