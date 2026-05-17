@@ -117,11 +117,10 @@ for prefix in "${!accounts[@]}"; do
     #  dickwolff/export-to-ghostfolio
     
     # =====================================================================
-    # 🔥 MOTOR ORIGINAL DO CRIADOR (ADAPTADO À NUVEM - SEM INVENTAR)
+    # 🔥 MOTOR ORIGINAL DO CRIADOR (INJEÇÃO DIRETA À PROVA DE BALA)
     # =====================================================================
     echo "⚙️ Configurando o motor de conversão oficial do criador..."
     
-    # Se a pasta do motor não existir, descarrega o ZIP oficial do GitHub do criador
     if [ ! -d "e2g-core" ]; then
         echo "📥 Descarregando o conversor oficial (via ZIP)..."
         python3 -c "
@@ -137,12 +136,15 @@ os.remove('e2g.zip')
         cd e2g-core && npm install && cd ..
     fi
 
-    echo "🚀 Executando o motor original do criador..."
+    echo "🚀 Preparando código e executando o motor original..."
 
-    # Entramos na pasta do criador para rodar o motor
     cd e2g-core
     
-    # Exportamos os caminhos e credenciais para o sistema operativo do container
+    # 🔥 A LINHA MÁGICA: Injeta a corretora diretamente na primeira linha do ficheiro manual.ts
+    # Isto garante que o motor sabe que é a t212, mesmo que a linha de comandos falhe!
+    sed -i '1s/^/process.env.E2G_CONVERTER = "t212";\n/' src/manual.ts
+    
+    # Exportamos as restantes pastas e variáveis para o ambiente
     export INPUT_FILE="$csv_name"
     export GHOSTFOLIO_ACCOUNT_ID="$account_id"
     export GHOSTFOLIO_VALIDATE="${GHOSTFOLIO_VALIDATE:-true}"
@@ -155,8 +157,8 @@ os.remove('e2g.zip')
     export E2G_OUTPUT_DIR="$(pwd)/../out"
     export E2G_CACHE_DIR="$(pwd)/../cache"
     
-    # 🔥 Chamamos o script diretamente via npx tsx passando os argumentos com espaço
-    npx tsx ./src/manual.ts --converter t212 || {
+    # Arranca o motor de forma limpa
+    npm start || {
       echo "❌ O motor original falhou para $csv_name"
       cd ..
       rm -f "temp/$csv_name"
@@ -164,9 +166,9 @@ os.remove('e2g.zip')
       continue
     }
     
-    # Voltamos para a raiz do teu projeto para o script continuar normalmente
     cd ..
     echo "✅ Conversor oficial executado com sucesso!"
+    # =====================================================================
 
     # Collect all produced JSON files
     mapfile -t produced_json < <(find out -maxdepth 1 -type f -name 'ghostfolio-*.json' 2>/dev/null | sort)
