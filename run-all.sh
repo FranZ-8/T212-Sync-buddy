@@ -126,14 +126,14 @@ for prefix in "${!accounts[@]}"; do
         echo "📥 Descarregando o conversor oficial (via ZIP)..."
         # Descarrega o código fonte principal do criador sem precisar do comando 'git'
         python3 -c "
-    import urllib.request, zipfile, os
-    url = 'https://github.com/dickwolff/Export-To-Ghostfolio/archive/refs/heads/main.zip'
-    urllib.request.urlretrieve(url, 'e2g.zip')
-    with zipfile.ZipFile('e2g.zip', 'r') as zip_ref:
+import urllib.request, zipfile, os
+url = 'https://github.com/dickwolff/Export-To-Ghostfolio/archive/refs/heads/main.zip'
+urllib.request.urlretrieve(url, 'e2g.zip')
+with zipfile.ZipFile('e2g.zip', 'r') as zip_ref:
     zip_ref.extractall('.')
-    os.rename('Export-To-Ghostfolio-main', 'e2g-core')
-    os.remove('e2g.zip')
-    "
+os.rename('Export-To-Ghostfolio-main', 'e2g-core')
+os.remove('e2g.zip')
+"
         echo "📦 Instalando dependências do motor..."
         cd e2g-core && npm install && cd ..
     fi
