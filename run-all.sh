@@ -116,15 +116,11 @@ for prefix in "${!accounts[@]}"; do
     #  --add-host=host.docker.internal:host-gateway \
     #  dickwolff/export-to-ghostfolio
     
-
-
     echo "📝 Criando o script de upload com printf..."
 
-    # Garante que o ficheiro antigo é apagado
     rm -f upload_to_gf.py
 
-    # Cria o script Python definitivo usando códigos hex para aspas
-    printf "import os, sys, requests\n" >> upload_to_gf.py
+    printf "import os, sys, requests, json\n" >> upload_to_gf.py
     printf "def upload():\n" >> upload_to_gf.py
     printf "    json_file = sys.argv[1]\n" >> upload_to_gf.py
     printf "    account_id = sys.argv[2]\n" >> upload_to_gf.py
@@ -136,8 +132,12 @@ for prefix in "${!accounts[@]}"; do
     printf "    headers = {\x22Authorization\x22: f\x22Bearer {secret}\x22, \x22Content-Type\x22: \x22application/json\x22}\n" >> upload_to_gf.py
     printf "    print(f\x22🚀 Enviando {json_file} para a API...\x22)\n" >> upload_to_gf.py
     printf "    with open(json_file, \x27r\x27) as f:\n" >> upload_to_gf.py
-    printf "        payload = f.read()\n" >> upload_to_gf.py
-    printf "    response = requests.post(endpoint, headers=headers, data=payload, verify=False)\n" >> upload_to_gf.py
+    printf "        payload = json.load(f)\n" >> upload_to_gf.py
+    printf "    if isinstance(payload, list):\n" >> upload_to_gf.py
+    printf "        payload = {\x22accountId\x22: account_id, \x22activities\x22: payload}\n" >> upload_to_gf.py
+    printf "    elif isinstance(payload, dict) and \x22activities\x22 in payload:\n" >> upload_to_gf.py
+    printf "        payload[\x22accountId\x22] = account_id\n" >> upload_to_gf.py
+    printf "    response = requests.post(endpoint, headers=headers, json=payload, verify=False)\n" >> upload_to_gf.py
     printf "    if response.status_code in [200, 201]:\n" >> upload_to_gf.py
     printf "        print(\x22✅ Envio concluido com sucesso total!\x22)\n" >> upload_to_gf.py
     printf "    else:\n" >> upload_to_gf.py
@@ -154,10 +154,12 @@ for prefix in "${!accounts[@]}"; do
     echo "⚠️ Nenhum ficheiro JSON encontrado na pasta out/ para enviar."
     fi
 
-    # Mantém o Python principal feliz dando o sinal verde
     mkdir -p "input/done"
     cp "$csv_file" "input/done/"
     exit 0
+
+    # Collect all produced JSON files
+    mapfile -t produced_json < <(find out -maxdepth 1 -type f -name 'ghostfolio-*.json' 2>/dev/null | sort)
 
     # Collect all produced JSON files
     mapfile -t produced_json < <(find out -maxdepth 1 -type f -name 'ghostfolio-*.json' 2>/dev/null | sort)
