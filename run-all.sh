@@ -117,7 +117,7 @@ for prefix in "${!accounts[@]}"; do
     #  dickwolff/export-to-ghostfolio
     
     # =====================================================================
-    # 🔥 ADAPTAÇÃO PARA A NUVEM FINAL (DESCARGA EM ZIP - SEM GIT)
+    # 🔥 MOTOR ORIGINAL DO CRIADOR (SEM ALTERAÇÕES)
     # =====================================================================
     echo "⚙️ Configurando o motor de conversão oficial do criador..."
     
@@ -132,13 +132,15 @@ with zipfile.ZipFile('e2g.zip', 'r') as zip_ref:
 os.rename('Export-To-Ghostfolio-main', 'e2g-core')
 os.remove('e2g.zip')
 "
-        echo "📦 Instalando dependências do motor..."
-        cd e2g-core && npm install && cd ..
+        echo "📦 Instalando dependências oficiais..."
+        cd e2g-core && npm install && npm run build --if-present && cd ..
     fi
 
-    echo "🚀 Iniciando a conversão oficial (Formato Nativo)..."
+    echo "🚀 Executando o motor original..."
 
-    # Executa o conversor chamando diretamente o arquivo javascript local
+    # Entramos na pasta do criador para o Node ler o package.json original dele
+    cd e2g-core
+    
     INPUT_FILE="$csv_name" \
     GHOSTFOLIO_ACCOUNT_ID="$account_id" \
     GHOSTFOLIO_VALIDATE="${GHOSTFOLIO_VALIDATE:-true}" \
@@ -147,15 +149,19 @@ os.remove('e2g.zip')
     GHOSTFOLIO_URL="$GHOSTFOLIO_URL" \
     GHOSTFOLIO_SECRET="$GHOSTFOLIO_SECRET" \
     NODE_OPTIONS="${NODE_OPTIONS:---max-old-space-size=4000}" \
-    E2G_INPUT_DIR="$(pwd)/temp" \
-    E2G_OUTPUT_DIR="$(pwd)/out" \
-    E2G_CACHE_DIR="$(pwd)/cache" \
-    node e2g-core/dist/index.js || node e2g-core/src/index.js || {
-      echo "❌ A conversão nativa falhou para $csv_name"
+    E2G_INPUT_DIR="$(pwd)/../temp" \
+    E2G_OUTPUT_DIR="$(pwd)/../out" \
+    E2G_CACHE_DIR="$(pwd)/../cache" \
+    npm start || {
+      echo "❌ O motor original falhou para $csv_name"
+      cd ..
       rm -f "temp/$csv_name"
       had_failure=1
       continue
     }
+    
+    # Voltamos para a raiz do teu projeto para continuar o script
+    cd ..
     echo "✅ Conversor oficial executado com sucesso!"
     # =====================================================================
 
