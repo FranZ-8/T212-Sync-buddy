@@ -126,7 +126,7 @@ for prefix in "${!accounts[@]}"; do
         python3 -c "
 import urllib.request, zipfile, os
 url = 'https://github.com/dickwolff/Export-To-Ghostfolio/archive/refs/heads/main.zip'
-urllib.request.urlretrieve(url, 'e2g.zip')
+urlretrieve(url, 'e2g.zip')
 with zipfile.ZipFile('e2g.zip', 'r') as zip_ref:
     zip_ref.extractall('.')
 os.rename('Export-To-Ghostfolio-main', 'e2g-core')
@@ -140,9 +140,8 @@ os.remove('e2g.zip')
 
     cd e2g-core
     
-    # 🔥 A LINHA MÁGICA: Injeta a corretora diretamente na primeira linha do ficheiro manual.ts
-    # Isto garante que o motor sabe que é a t212, mesmo que a linha de comandos falhe!
-    sed -i '1s/^/process.env.E2G_CONVERTER = "t212";\n/' src/manual.ts
+    # 🌟 CORREÇÃO AQUI: Exportar a variável que o npm start realmente lê
+    export CONVERTER="t212"
     
     # Exportamos as restantes pastas e variáveis para o ambiente
     export INPUT_FILE="$csv_name"
@@ -158,7 +157,7 @@ os.remove('e2g.zip')
     export E2G_CACHE_DIR="$(pwd)/../cache"
     
     # Arranca o motor de forma limpa
-    npm start || {
+    npm start -- -- $CONVERTER || {
       echo "❌ O motor original falhou para $csv_name"
       cd ..
       rm -f "temp/$csv_name"
