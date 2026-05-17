@@ -4,6 +4,12 @@ FROM docker:27-cli AS docker-cli
 # Stage 2: Build the fetcher image
 FROM python:3.12-slim
 
+# Inserir estas linhas para a Railway ter NPM e Node.js
+RUN apt-get update && apt-get install -y \
+    nodejs \
+        npm && \
+    rm -rf /var/lib/apt/lists/*
+    
 # Install bash tools needed by run-all.sh
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
