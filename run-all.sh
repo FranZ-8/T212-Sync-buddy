@@ -119,12 +119,12 @@ for prefix in "${!accounts[@]}"; do
     # --- ADAPTAÇÃO PARA A NUVEM (SEM DOCKER) ---
     echo "⚙️ Executando o conversor nativo do criador..."
     
-    # Instala o exportador oficial se ele não existir no ambiente
-    if ! command -v ghostfolio-exporter &> /dev/null; then
-       npm install -g ghostfolio-exporter || npm install ghostfolio-exporter
+    # Instala o exportador oficial com o nome correto do pacote se ele não existir
+    if ! command -v export-to-ghostfolio &> /dev/null; then
+       npm install -g export-to-ghostfolio || npm install export-to-ghostfolio
     fi
 
-    # Executa exatamente as mesmas variáveis que o criador definiu, mas diretamente no sistema
+    # Executa exatamente as mesmas variáveis, chamando o binário correto via npx
     INPUT_FILE="$csv_name" \
     GHOSTFOLIO_ACCOUNT_ID="$account_id" \
     GHOSTFOLIO_VALIDATE="${GHOSTFOLIO_VALIDATE:-true}" \
@@ -136,7 +136,7 @@ for prefix in "${!accounts[@]}"; do
     E2G_INPUT_DIR="$(pwd)/temp" \
     E2G_OUTPUT_DIR="$(pwd)/out" \
     E2G_CACHE_DIR="$(pwd)/cache" \
-    npx ghostfolio-exporter || {
+    npx export-to-ghostfolio || {
       echo "  ❌ Conversion/Upload failed for $csv_name"
       rm -f "temp/$csv_name"
       had_failure=1
