@@ -116,43 +116,33 @@ for prefix in "${!accounts[@]}"; do
     #  --add-host=host.docker.internal:host-gateway \
     #  dickwolff/export-to-ghostfolio
     
-    echo "📝 Criando o script de envio nativo (Formato Original)..."
-
-    rm -f upload_to_gf.py
-
-    # Cria o script Python que envia o JSON exatamente como o conversor o gerou
-    printf "import os, sys, requests\n" >> upload_to_gf.py
-    printf "def upload():\n" >> upload_to_gf.py
-    printf "    json_file = sys.argv[1]\n" >> upload_to_gf.py
-    printf "    account_id = sys.argv[2]\n" >> upload_to_gf.py
-    printf "    url = os.environ.get(\x22GHOSTFOLIO_URL\x22)\n" >> upload_to_gf.py
-    printf "    secret = os.environ.get(\x22GHOSTFOLIO_SECRET\x22)\n" >> upload_to_gf.py
-    printf "    if not url or not secret:\n" >> upload_to_gf.py
-    printf "        print(\x22Erro: Variaveis Ghostfolio nao encontradas.\x22); sys.exit(1)\n" >> upload_to_gf.py
-    printf "    endpoint = f\x22{url.rstrip(\x27/\x27)}/api/v1/import\x22\n" >> upload_to_gf.py
-    printf "    headers = {\x22Authorization\x22: f\x22Bearer {secret}\x22, \x22Content-Type\x22: \x22application/json\x22}\n" >> upload_to_gf.py
-    printf "    print(f\x22🚀 Enviando {json_file} sem alteracoes para a API...\x22)\n" >> upload_to_gf.py
-    printf "    with open(json_file, \x27r\x27) as f:\n" >> upload_to_gf.py
-    printf "        payload = f.read()\n" >> upload_to_gf.py
-    printf "    response = requests.post(endpoint, headers=headers, data=payload, verify=False)\n" >> upload_to_gf.py
-    printf "    print(f\x22Status da API: {response.status_code}\x22)\n" >> upload_to_gf.py
-    printf "    print(response.text)\n" >> upload_to_gf.py
-    printf "    if response.status_code not in [200, 201]: sys.exit(1)\n" >> upload_to_gf.py
-    printf "if __name__ == \x22__main__\x22: upload()\n" >> upload_to_gf.py
-
-    # Localiza o ficheiro JSON oficial gerado pelo projeto na pasta out
-    json_file=$(find out -maxdepth 1 -type f -name 'ghostfolio-*.json' 2>/dev/null | head -n 1)
-
-    if [ -n "$json_file" ]; then
-      echo "🎯 Ficheiro do criador encontrado: $json_file"
-      python upload_to_gf.py "$json_file" "$account_id"
-    else
-      echo "⚠️ Nenhum ficheiro JSON encontrado na pasta out/."
+    # --- ADAPTAÇÃO PARA A NUVEM (SEM DOCKER) ---
+    echo "⚙️ Executando o conversor nativo do criador..."
+    
+    # Instala o exportador oficial se ele não existir no ambiente
+    if ! command -v ghostfolio-exporter &> /dev/null; then
+       npm install -g ghostfolio-exporter || npm install ghostfolio-exporter
     fi
 
-    mkdir -p "input/done"
-    cp "$csv_file" "input/done/"
-    exit 0
+    # Executa exatamente as mesmas variáveis que o criador definiu, mas diretamente no sistema
+    INPUT_FILE="$csv_name" \
+    GHOSTFOLIO_ACCOUNT_ID="$account_id" \
+    GHOSTFOLIO_VALIDATE="${GHOSTFOLIO_VALIDATE:-true}" \
+    GHOSTFOLIO_IMPORT="${GHOSTFOLIO_IMPORT:-true}" \
+    GHOSTFOLIO_UPDATE_CASH="${GHOSTFOLIO_UPDATE_CASH:-TRUE}" \
+    GHOSTFOLIO_URL="$GHOSTFOLIO_URL" \
+    GHOSTFOLIO_SECRET="$GHOSTFOLIO_SECRET" \
+    NODE_OPTIONS="${NODE_OPTIONS:---max-old-space-size=4000}" \
+    E2G_INPUT_DIR="$(pwd)/temp" \
+    E2G_OUTPUT_DIR="$(pwd)/out" \
+    E2G_CACHE_DIR="$(pwd)/cache" \
+    npx ghostfolio-exporter || {
+      echo "  ❌ Conversion/Upload failed for $csv_name"
+      rm -f "temp/$csv_name"
+      had_failure=1
+      continue
+    }
+    # --- FIM DA ADAPTAÇÃO ---
 
     # Collect all produced JSON files
     mapfile -t produced_json < <(find out -maxdepth 1 -type f -name 'ghostfolio-*.json' 2>/dev/null | sort)
