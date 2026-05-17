@@ -119,10 +119,8 @@ for prefix in "${!accounts[@]}"; do
 
     echo "📝 Criando o script de upload com printf..."
 
-    # Limpa qualquer tentativa anterior
     rm -f upload_to_gf.py
 
-    # Monta o script Python usando códigos hex para aspas, evitando erros de sintaxe
     printf "import os, sys, requests\n" >> upload_to_gf.py
     printf "def upload():\n" >> upload_to_gf.py
     printf "    csv_file = sys.argv[1]\n" >> upload_to_gf.py
@@ -130,9 +128,9 @@ for prefix in "${!accounts[@]}"; do
     printf "    url = os.environ.get(\x22GHOSTFOLIO_URL\x22)\n" >> upload_to_gf.py
     printf "    secret = os.environ.get(\x22GHOSTFOLIO_SECRET\x22)\n" >> upload_to_gf.py
     printf "    if not url or not secret:\n" >> upload_to_gf.py
-    printf "        print(\x22Erro: Variaveis Ghostfolio nao encontradas.\x22); sys.exit(1)\n" >> upload_to_gf.py
+    printf "        print(\x22Erro: Variaveis GHOSTFOLIO_URL ou GHOSTFOLIO_SECRET em falta.\x22); sys.exit(1)\n" >> upload_to_gf.py
     printf "    endpoint = f\x22{url.rstrip(\x27/\x27)}/api/v1/import\x22\n" >> upload_to_gf.py
-    printf "    headers = {\x22Authorization\x22: f\x22Bearer {secret}\x22, \x22Content-Type\x22: \x22application/json\x22}\n" >> upload_to_gf.py
+    printf "    headers = {\x22Authorization\x22: f\x22Bearer {secret}\x22}\n" >> upload_to_gf.py
     printf "    print(f\x22Enviando {csv_file} para a API...\x22)\n" >> upload_to_gf.py
     printf "    with open(csv_file, \x27rb\x27) as f:\n" >> upload_to_gf.py
     printf "        files = {\x27file\x27: (\x27import.csv\x27, f, \x27text/csv\x27)}\n" >> upload_to_gf.py
@@ -147,7 +145,6 @@ for prefix in "${!accounts[@]}"; do
     echo "🚀 Executando o script de envio..."
     python upload_to_gf.py "$csv_file" "$account_id"
 
-    # Garante o estado verde no script principal do Python
     mkdir -p "input/done"
     cp "$csv_file" "input/done/"
     exit 0
