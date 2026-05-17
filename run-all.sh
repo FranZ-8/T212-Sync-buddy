@@ -116,15 +116,8 @@ for prefix in "${!accounts[@]}"; do
     #  --add-host=host.docker.internal:host-gateway \
     #  dickwolff/export-to-ghostfolio
     
-    echo "🚀 Enviando o CSV diretamente para a API do Ghostfolio..."
-
-    # Envia o ficheiro usando as credenciais do teu .env
-    curl -X POST "${GHOSTFOLIO_URL}/api/v1/import" \
-    -H "Authorization: Bearer ${GHOSTFOLIO_SECRET}" \
-    -F "file=@${csv_file}" \
-    -F "accountId=${account_id}"
-
-    echo "✅ Envio concluído!"
+    # Substitui o curl pelo nosso script Python nativo
+    python upload_to_gf.py "$csv_file" "$account_id"
 
     # Engana o Python para salvar o estado com sucesso
     mkdir -p "input/done"
