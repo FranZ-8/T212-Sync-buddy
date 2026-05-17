@@ -131,6 +131,7 @@ for prefix in "${!accounts[@]}"; do
     echo "🚀 Iniciando a conversão oficial (Formato Original)..."
 
     # 2. Executa o conversor nativo com as pastas mapeadas exatamente como o Docker faria
+    # Executa o conversor usando o comando binário direto do pacote instalado
     INPUT_FILE="$csv_name" \
     GHOSTFOLIO_ACCOUNT_ID="$account_id" \
     GHOSTFOLIO_VALIDATE="${GHOSTFOLIO_VALIDATE:-true}" \
@@ -142,7 +143,7 @@ for prefix in "${!accounts[@]}"; do
     E2G_INPUT_DIR="$(pwd)/temp" \
     E2G_OUTPUT_DIR="$(pwd)/out" \
     E2G_CACHE_DIR="$(pwd)/cache" \
-    node e2g-core/src/index.js || {
+    npx export-to-ghostfolio || {
       echo "❌ A conversão nativa falhou para $csv_name"
       rm -f "temp/$csv_name"
       had_failure=1
