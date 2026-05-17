@@ -117,10 +117,11 @@ for prefix in "${!accounts[@]}"; do
     #  dickwolff/export-to-ghostfolio
     
     # =====================================================================
-    # 🔥 MOTOR ORIGINAL DO CRIADOR (SEM ALTERAÇÕES)
+    # 🔥 MOTOR ORIGINAL DO CRIADOR (ADAPTADO À NUVEM - SEM INVENTAR)
     # =====================================================================
     echo "⚙️ Configurando o motor de conversão oficial do criador..."
     
+    # Se a pasta do motor não existir, descarrega o ZIP oficial do GitHub do criador
     if [ ! -d "e2g-core" ]; then
         echo "📥 Descarregando o conversor oficial (via ZIP)..."
         python3 -c "
@@ -133,27 +134,29 @@ os.rename('Export-To-Ghostfolio-main', 'e2g-core')
 os.remove('e2g.zip')
 "
         echo "📦 Instalando dependências oficiais..."
-        cd e2g-core && npm install && npm run build --if-present && cd ..
+        cd e2g-core && npm install && cd ..
     fi
 
-    echo "🚀 Executando o motor original..."
+    echo "🚀 Executando o motor original do criador..."
 
     # Entramos na pasta do criador para o Node ler o package.json original dele
     cd e2g-core
     
-    INPUT_FILE="$csv_name" \
-    E2G_CONVERTER="t212" \
-    GHOSTFOLIO_ACCOUNT_ID="$account_id" \
-    GHOSTFOLIO_VALIDATE="${GHOSTFOLIO_VALIDATE:-true}" \
-    GHOSTFOLIO_IMPORT="${GHOSTFOLIO_IMPORT:-true}" \
-    GHOSTFOLIO_UPDATE_CASH="${GHOSTFOLIO_UPDATE_CASH:-TRUE}" \
-    GHOSTFOLIO_URL="$GHOSTFOLIO_URL" \
-    GHOSTFOLIO_SECRET="$GHOSTFOLIO_SECRET" \
-    NODE_OPTIONS="${NODE_OPTIONS:---max-old-space-size=4000}" \
-    E2G_INPUT_DIR="$(pwd)/../temp" \
-    E2G_OUTPUT_DIR="$(pwd)/../out" \
-    E2G_CACHE_DIR="$(pwd)/../cache" \
-    npm start || {
+    # Exportamos os caminhos e credenciais para o sistema operativo do container
+    export INPUT_FILE="$csv_name"
+    export GHOSTFOLIO_ACCOUNT_ID="$account_id"
+    export GHOSTFOLIO_VALIDATE="${GHOSTFOLIO_VALIDATE:-true}"
+    export GHOSTFOLIO_IMPORT="${GHOSTFOLIO_IMPORT:-true}"
+    export GHOSTFOLIO_UPDATE_CASH="${GHOSTFOLIO_UPDATE_CASH:-TRUE}"
+    export GHOSTFOLIO_URL="$GHOSTFOLIO_URL"
+    export GHOSTFOLIO_SECRET="$GHOSTFOLIO_SECRET"
+    export NODE_OPTIONS="${NODE_OPTIONS:---max-old-space-size=4000}"
+    export E2G_INPUT_DIR="$(pwd)/../temp"
+    export E2G_OUTPUT_DIR="$(pwd)/../out"
+    export E2G_CACHE_DIR="$(pwd)/../cache"
+    
+    # Executamos o comando oficial passando o argumento que valida a Trading 212
+    npm start -- --converter=t212 || {
       echo "❌ O motor original falhou para $csv_name"
       cd ..
       rm -f "temp/$csv_name"
@@ -161,7 +164,7 @@ os.remove('e2g.zip')
       continue
     }
     
-    # Voltamos para a raiz do teu projeto para continuar o script
+    # Voltamos para a raiz do teu projeto para o script continuar normalmente
     cd ..
     echo "✅ Conversor oficial executado com sucesso!"
     # =====================================================================
