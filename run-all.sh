@@ -116,15 +116,13 @@ for prefix in "${!accounts[@]}"; do
     #  --add-host=host.docker.internal:host-gateway \
     #  dickwolff/export-to-ghostfolio
     
-# =====================================================================
+    # =====================================================================
     # 🔥 ADAPTAÇÃO PARA A NUVEM FINAL (DESCARGA EM ZIP - SEM GIT)
     # =====================================================================
     echo "⚙️ Configurando o motor de conversão oficial do criador..."
     
-    # 1. Se a pasta do motor não existir, descarrega o ZIP oficial do GitHub do criador
     if [ ! -d "e2g-core" ]; then
         echo "📥 Descarregando o conversor oficial (via ZIP)..."
-        # Descarrega o código fonte principal do criador sem precisar do comando 'git'
         python3 -c "
 import urllib.request, zipfile, os
 url = 'https://github.com/dickwolff/Export-To-Ghostfolio/archive/refs/heads/main.zip'
@@ -140,7 +138,7 @@ os.remove('e2g.zip')
 
     echo "🚀 Iniciando a conversão oficial (Formato Nativo)..."
 
-    # 2. Executa o conversor nativo apontando para a pasta onde extraímos o código
+    # Executa o conversor chamando diretamente o arquivo javascript local
     INPUT_FILE="$csv_name" \
     GHOSTFOLIO_ACCOUNT_ID="$account_id" \
     GHOSTFOLIO_VALIDATE="${GHOSTFOLIO_VALIDATE:-true}" \
@@ -152,7 +150,7 @@ os.remove('e2g.zip')
     E2G_INPUT_DIR="$(pwd)/temp" \
     E2G_OUTPUT_DIR="$(pwd)/out" \
     E2G_CACHE_DIR="$(pwd)/cache" \
-    npx export-to-ghostfolio || {
+    node e2g-core/dist/index.js || node e2g-core/src/index.js || {
       echo "❌ A conversão nativa falhou para $csv_name"
       rm -f "temp/$csv_name"
       had_failure=1
