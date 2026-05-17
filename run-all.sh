@@ -132,12 +132,12 @@ for prefix in "${!accounts[@]}"; do
     printf "    if not url or not secret:\n" >> upload_to_gf.py
     printf "        print(\x22Erro: Variaveis Ghostfolio nao encontradas.\x22); sys.exit(1)\n" >> upload_to_gf.py
     printf "    endpoint = f\x22{url.rstrip(\x27/\x27)}/api/v1/import\x22\n" >> upload_to_gf.py
-    printf "    headers = {\x22Authorization\x22: f\x22Bearer {secret}\x22}\n" >> upload_to_gf.py
+    printf "    headers = {\x22Authorization\x22: f\x22Bearer {secret}\x22, \x22Content-Type\x22: \x22application/json\x22}\n" >> upload_to_gf.py
     printf "    print(f\x22Enviando {csv_file} para a API...\x22)\n" >> upload_to_gf.py
     printf "    with open(csv_file, \x27rb\x27) as f:\n" >> upload_to_gf.py
     printf "        files = {\x27file\x27: (\x27import.csv\x27, f, \x27text/csv\x27)}\n" >> upload_to_gf.py
     printf "        data = {\x27accountId\x27: account_id}\n" >> upload_to_gf.py
-    printf "        response = requests.post(endpoint, headers=headers, files=files, data=data)\n" >> upload_to_gf.py
+    printf "        response = requests.post(endpoint, headers=headers, files=files, data=data, verify=False)\n" >> upload_to_gf.py
     printf "    if response.status_code in [200, 201]:\n" >> upload_to_gf.py
     printf "        print(\x22Envio concluido com sucesso!\x22)\n" >> upload_to_gf.py
     printf "    else:\n" >> upload_to_gf.py
