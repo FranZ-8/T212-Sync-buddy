@@ -116,15 +116,21 @@ for prefix in "${!accounts[@]}"; do
     #  --add-host=host.docker.internal:host-gateway \
     #  dickwolff/export-to-ghostfolio
     
-    # --- ADAPTAÇÃO PARA A NUVEM (SEM DOCKER) ---
-    echo "⚙️ Executando o conversor nativo do criador..."
+    # =====================================================================
+    # 🔥 ADAPTAÇÃO PARA A NUVEM FINAL (SEM DOCKER - USANDO O MOTOR ORIGINAL)
+    # =====================================================================
+    echo "⚙️ Configurando o motor de conversão oficial do criador..."
     
-    # Instala o exportador oficial com o nome correto do pacote se ele não existir
-    if ! command -v export-to-ghostfolio &> /dev/null; then
-       npm install -g export-to-ghostfolio || npm install export-to-ghostfolio
+    # 1. Se o conversor do criador não estiver na máquina, clona-o diretamente do GitHub oficial
+    if [ ! -d "e2g-core" ]; then
+        echo "📥 Descarregando o conversor oficial do GitHub..."
+        git clone https://github.com/dickwolff/Export-To-Ghostfolio.git e2g-core
+        cd e2g-core && npm install && cd ..
     fi
 
-    # Executa exatamente as mesmas variáveis, chamando o binário correto via npx
+    echo "🚀 Iniciando a conversão oficial (Formato Original)..."
+
+    # 2. Executa o conversor nativo com as pastas mapeadas exatamente como o Docker faria
     INPUT_FILE="$csv_name" \
     GHOSTFOLIO_ACCOUNT_ID="$account_id" \
     GHOSTFOLIO_VALIDATE="${GHOSTFOLIO_VALIDATE:-true}" \
@@ -136,13 +142,14 @@ for prefix in "${!accounts[@]}"; do
     E2G_INPUT_DIR="$(pwd)/temp" \
     E2G_OUTPUT_DIR="$(pwd)/out" \
     E2G_CACHE_DIR="$(pwd)/cache" \
-    npx export-to-ghostfolio || {
-      echo "  ❌ Conversion/Upload failed for $csv_name"
+    node e2g-core/src/index.js || {
+      echo "❌ A conversão nativa falhou para $csv_name"
       rm -f "temp/$csv_name"
       had_failure=1
       continue
     }
-    # --- FIM DA ADAPTAÇÃO ---
+    echo "✅ Conversor oficial executado com sucesso!"
+    # =====================================================================
 
     # Collect all produced JSON files
     mapfile -t produced_json < <(find out -maxdepth 1 -type f -name 'ghostfolio-*.json' 2>/dev/null | sort)
