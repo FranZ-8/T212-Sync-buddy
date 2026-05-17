@@ -116,11 +116,12 @@ for prefix in "${!accounts[@]}"; do
     #  --add-host=host.docker.internal:host-gateway \
     #  dickwolff/export-to-ghostfolio
     
-    echo "📝 Criando o script de upload com printf..."
+    echo "📝 Criando o script de envio nativo (Formato Original)..."
 
     rm -f upload_to_gf.py
 
-    printf "import os, sys, requests, json\n" >> upload_to_gf.py
+    # Cria o script Python que envia o JSON exatamente como o conversor o gerou
+    printf "import os, sys, requests\n" >> upload_to_gf.py
     printf "def upload():\n" >> upload_to_gf.py
     printf "    json_file = sys.argv[1]\n" >> upload_to_gf.py
     printf "    account_id = sys.argv[2]\n" >> upload_to_gf.py
@@ -130,77 +131,29 @@ for prefix in "${!accounts[@]}"; do
     printf "        print(\x22Erro: Variaveis Ghostfolio nao encontradas.\x22); sys.exit(1)\n" >> upload_to_gf.py
     printf "    endpoint = f\x22{url.rstrip(\x27/\x27)}/api/v1/import\x22\n" >> upload_to_gf.py
     printf "    headers = {\x22Authorization\x22: f\x22Bearer {secret}\x22, \x22Content-Type\x22: \x22application/json\x22}\n" >> upload_to_gf.py
-    printf "    print(f\x22🚀 Enviando {json_file} para a API...\x22)\n" >> upload_to_gf.py
+    printf "    print(f\x22🚀 Enviando {json_file} sem alteracoes para a API...\x22)\n" >> upload_to_gf.py
     printf "    with open(json_file, \x27r\x27) as f:\n" >> upload_to_gf.py
-    printf "        payload = json.load(f)\n" >> upload_to_gf.py
-    printf "    if isinstance(payload, list):\n" >> upload_to_gf.py
-    printf "        payload = {\x22accountId\x22: account_id, \x22activities\x22: payload}\n" >> upload_to_gf.py
-    printf "    elif isinstance(payload, dict) and \x22activities\x22 in payload:\n" >> upload_to_gf.py
-    printf "        payload[\x22accountId\x22] = account_id\n" >> upload_to_gf.py
-    printf "    response = requests.post(endpoint, headers=headers, json=payload, verify=False)\n" >> upload_to_gf.py
-    printf "    if response.status_code in [200, 201]:\n" >> upload_to_gf.py
-    printf "        print(\x22✅ Envio concluido com sucesso total!\x22)\n" >> upload_to_gf.py
-    printf "    else:\n" >> upload_to_gf.py
-    printf "        print(f\x22Falha: {response.status_code}\x22); print(response.text); sys.exit(1)\n" >> upload_to_gf.py
+    printf "        payload = f.read()\n" >> upload_to_gf.py
+    printf "    response = requests.post(endpoint, headers=headers, data=payload, verify=False)\n" >> upload_to_gf.py
+    printf "    print(f\x22Status da API: {response.status_code}\x22)\n" >> upload_to_gf.py
+    printf "    print(response.text)\n" >> upload_to_gf.py
+    printf "    if response.status_code not in [200, 201]: sys.exit(1)\n" >> upload_to_gf.py
     printf "if __name__ == \x22__main__\x22: upload()\n" >> upload_to_gf.py
 
-    # Localiza o ficheiro JSON que o teu sistema acabou de gerar na pasta out
+    # Localiza o ficheiro JSON oficial gerado pelo projeto na pasta out
     json_file=$(find out -maxdepth 1 -type f -name 'ghostfolio-*.json' 2>/dev/null | head -n 1)
 
     if [ -n "$json_file" ]; then
-    echo "🚀 Ficheiro JSON encontrado: $json_file. Iniciando envio..."
-    python upload_to_gf.py "$json_file" "$account_id"
+      echo "🎯 Ficheiro do criador encontrado: $json_file"
+      python upload_to_gf.py "$json_file" "$account_id"
     else
-    echo "⚠️ Nenhum ficheiro JSON encontrado na pasta out/ para enviar."
+      echo "⚠️ Nenhum ficheiro JSON encontrado na pasta out/."
     fi
 
     mkdir -p "input/done"
     cp "$csv_file" "input/done/"
     exit 0
 
-    # Collect all produced JSON files
-    mapfile -t produced_json < <(find out -maxdepth 1 -type f -name 'ghostfolio-*.json' 2>/dev/null | sort)
-
-    # Collect all produced JSON files
-    mapfile -t produced_json < <(find out -maxdepth 1 -type f -name 'ghostfolio-*.json' 2>/dev/null | sort)
-    echo "📝 Criando o script de upload com printf..."
-
-    rm -f upload_to_gf.py
-
-    printf "import os, sys, requests\n" >> upload_to_gf.py
-    printf "def upload():\n" >> upload_to_gf.py
-    printf "    csv_file = sys.argv[1]\n" >> upload_to_gf.py
-    printf "    account_id = sys.argv[2]\n" >> upload_to_gf.py
-    printf "    url = os.environ.get(\x22GHOSTFOLIO_URL\x22)\n" >> upload_to_gf.py
-    printf "    secret = os.environ.get(\x22GHOSTFOLIO_SECRET\x22)\n" >> upload_to_gf.py
-    printf "    if not url or not secret:\n" >> upload_to_gf.py
-    printf "        print(\x22Erro: Variaveis GHOSTFOLIO_URL ou GHOSTFOLIO_SECRET em falta.\x22); sys.exit(1)\n" >> upload_to_gf.py
-    printf "    endpoint = f\x22{url.rstrip(\x27/\x27)}/api/v1/import\x22\n" >> upload_to_gf.py
-    printf "    headers = {\x22Authorization\x22: f\x22Bearer {secret}\x22}\n" >> upload_to_gf.py
-    printf "    print(f\x22Enviando {csv_file} para a API...\x22)\n" >> upload_to_gf.py
-    printf "    with open(csv_file, \x27rb\x27) as f:\n" >> upload_to_gf.py
-    printf "        files = {\x27file\x27: (\x27import.csv\x27, f, \x27text/csv\x27)}\n" >> upload_to_gf.py
-    printf "        data = {\x27accountId\x27: account_id}\n" >> upload_to_gf.py
-    printf "        response = requests.post(endpoint, headers=headers, files=files, data=data, verify=False)\n" >> upload_to_gf.py
-    printf "    if response.status_code in [200, 201]:\n" >> upload_to_gf.py
-    printf "        print(\x22Envio concluido com sucesso!\x22)\n" >> upload_to_gf.py
-    printf "    else:\n" >> upload_to_gf.py
-    printf "        print(f\x22Falha: {response.status_code}\x22); print(response.text); sys.exit(1)\n" >> upload_to_gf.py
-    printf "if __name__ == \x22__main__\x22: upload()\n" >> upload_to_gf.py
-
-    echo "🚀 Executando o script de envio..."
-    python upload_to_gf.py "$csv_file" "$account_id"
-
-    mkdir -p "input/done"
-    cp "$csv_file" "input/done/"
-    exit 0
-
-    # Collect all produced JSON files
-    mapfile -t produced_json < <(find out -maxdepth 1 -type f -name 'ghostfolio-*.json' 2>/dev/null | sort)
-
-    # Collect all produced JSON files
-    mapfile -t produced_json < <(find out -maxdepth 1 -type f -name 'ghostfolio-*.json' 2>/dev/null | sort)
-    
     # Collect all produced JSON files
     mapfile -t produced_json < <(find out -maxdepth 1 -type f -name 'ghostfolio-*.json' 2>/dev/null | sort)
 
