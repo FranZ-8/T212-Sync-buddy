@@ -140,8 +140,9 @@ os.remove('e2g.zip')
 
     cd e2g-core
     
-    # 🌟 CORREÇÃO AQUI: Exportar a variável que o npm start realmente lê
+    # 🌟 A SOLUÇÃO: Definir as duas variáveis que o motor do criador aceita para o conversor
     export CONVERTER="t212"
+    export E2G_CONVERTER="t212"
     
     # Exportamos as restantes pastas e variáveis para o ambiente
     export INPUT_FILE="$csv_name"
@@ -156,8 +157,8 @@ os.remove('e2g.zip')
     export E2G_OUTPUT_DIR="$(pwd)/../out"
     export E2G_CACHE_DIR="$(pwd)/../cache"
     
-    # Arranca o motor de forma limpa
-    npm start -- -- $CONVERTER || {
+    # Arranca o motor de forma simples e limpa, sem argumentos extra
+    npm start || {
       echo "❌ O motor original falhou para $csv_name"
       cd ..
       rm -f "temp/$csv_name"
