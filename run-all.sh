@@ -126,7 +126,7 @@ for prefix in "${!accounts[@]}"; do
         python3 -c "
 import urllib.request, zipfile, os
 url = 'https://github.com/dickwolff/Export-To-Ghostfolio/archive/refs/heads/main.zip'
-urlretrieve(url, 'e2g.zip')
+urllib.request.urlretrieve(url, 'e2g.zip')
 with zipfile.ZipFile('e2g.zip', 'r') as zip_ref:
     zip_ref.extractall('.')
 os.rename('Export-To-Ghostfolio-main', 'e2g-core')
